@@ -1,0 +1,1616 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Recetario">
+<meta name="theme-color" content="#FF6B35">
+<link rel="manifest" href="manifest.json">
+<title>Recetario</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  :root {
+    --orange: #FF6B35;
+    --orange-light: #FFF0EA;
+    --orange-dark: #C94E1E;
+    --green: #4CAF50;
+    --green-light: #E8F5E9;
+    --green-dark: #2E7D32;
+    --yellow: #FFC107;
+    --purple: #9C27B0;
+    --blue: #2196F3;
+    --pink: #E91E63;
+    --bg: #F8F4EF;
+    --card: #FFFFFF;
+    --text: #1A1A1A;
+    --text-soft: #666666;
+    --border: #EBEBEB;
+    --radius: 16px;
+    --radius-sm: 10px;
+    --shadow: 0 2px 12px rgba(0,0,0,0.08);
+    --shadow-md: 0 4px 20px rgba(0,0,0,0.12);
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    max-width: 430px;
+    margin: 0 auto;
+    position: relative;
+  }
+
+  /* HEADER */
+  .header {
+    background: var(--orange);
+    padding: 56px 20px 20px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .header-title {
+    font-size: 26px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: -0.5px;
+  }
+  .header-subtitle {
+    font-size: 13px;
+    color: rgba(255,255,255,0.75);
+    margin-top: 1px;
+  }
+  .btn-add-header {
+    width: 40px; height: 40px;
+    background: rgba(255,255,255,0.2);
+    border: 2px solid rgba(255,255,255,0.4);
+    border-radius: 50%;
+    color: #fff;
+    font-size: 22px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .btn-add-header:active { background: rgba(255,255,255,0.35); }
+
+  /* TABS */
+  .tabs {
+    display: flex;
+    gap: 8px;
+  }
+  .tab {
+    padding: 7px 16px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .tab-all { background: rgba(255,255,255,0.2); color: rgba(255,255,255,0.85); }
+  .tab-all.active { background: #fff; color: var(--orange); }
+  .tab-fit { background: rgba(255,255,255,0.2); color: rgba(255,255,255,0.85); }
+  .tab-fit.active { background: var(--green); color: #fff; }
+
+  /* SEARCH */
+  .search-bar {
+    padding: 12px 16px 0;
+  }
+  .search-input {
+    width: 100%;
+    padding: 11px 16px 11px 40px;
+    border-radius: 12px;
+    border: none;
+    background: #fff;
+    font-size: 15px;
+    color: var(--text);
+    box-shadow: var(--shadow);
+    position: relative;
+  }
+  .search-wrap {
+    position: relative;
+  }
+  .search-icon {
+    position: absolute;
+    left: 13px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 18px;
+    color: var(--text-soft);
+    pointer-events: none;
+  }
+
+  /* CONTENT */
+  .content {
+    padding: 16px;
+    padding-bottom: 100px;
+  }
+
+  /* CATEGORY LABEL */
+  .category-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--text-soft);
+    margin: 16px 0 8px;
+  }
+
+  /* RECIPE CARDS */
+  .recipes-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .recipe-card {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    box-shadow: var(--shadow);
+    border: 1.5px solid transparent;
+    transition: transform 0.12s, box-shadow 0.12s;
+    position: relative;
+    overflow: hidden;
+  }
+  .recipe-card:active { transform: scale(0.985); box-shadow: var(--shadow-md); }
+  .recipe-card.fit-card { border-color: var(--green); }
+  .recipe-card.fit-card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 4px;
+    background: var(--green);
+    border-radius: 4px 0 0 4px;
+  }
+
+  .recipe-emoji {
+    width: 48px; height: 48px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 26px;
+    flex-shrink: 0;
+  }
+  .recipe-emoji.normal { background: var(--orange-light); }
+  .recipe-emoji.fit { background: var(--green-light); }
+
+  .recipe-info { flex: 1; min-width: 0; }
+  .recipe-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.3;
+  }
+  .recipe-meta {
+    font-size: 12px;
+    color: var(--text-soft);
+    margin-top: 3px;
+  }
+
+  .fit-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: var(--green-light);
+    color: var(--green-dark);
+    font-size: 10px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    flex-shrink: 0;
+  }
+
+  .card-arrow {
+    color: #ccc;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+
+  /* DETAIL VIEW */
+  .detail-view {
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    z-index: 200;
+    overflow-y: auto;
+    transform: translateX(100%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    max-width: 430px;
+    margin: 0 auto;
+  }
+  .detail-view.open { transform: translateX(0); }
+
+  .detail-header {
+    padding: 56px 20px 24px;
+    position: relative;
+  }
+  .detail-header.normal { background: var(--orange); }
+  .detail-header.fit { background: linear-gradient(135deg, var(--green) 0%, #43A047 100%); background: var(--green); }
+
+  .btn-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: rgba(255,255,255,0.85);
+    font-size: 15px;
+    cursor: pointer;
+    margin-bottom: 16px;
+    border: none;
+    background: none;
+    padding: 0;
+  }
+  .btn-back:active { color: #fff; }
+
+  .detail-emoji-big {
+    font-size: 52px;
+    margin-bottom: 12px;
+    display: block;
+  }
+  .detail-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1.2;
+    margin-bottom: 4px;
+  }
+  .detail-fit-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(255,255,255,0.25);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 8px;
+  }
+
+  .detail-body {
+    padding: 20px 16px;
+  }
+
+  .section-card {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 12px;
+    box-shadow: var(--shadow);
+  }
+  .section-title {
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--text-soft);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-title-icon {
+    width: 28px; height: 28px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px;
+    flex-shrink: 0;
+  }
+  .icon-ing { background: #FFF3E0; }
+  .icon-steps { background: #E3F2FD; }
+
+  .ingredient-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 7px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+    line-height: 1.4;
+  }
+  .ingredient-item:last-child { border-bottom: none; }
+  .ingredient-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    margin-top: 6px;
+    flex-shrink: 0;
+  }
+  .dot-normal { background: var(--orange); }
+  .dot-fit { background: var(--green); }
+  .ingredient-subgroup {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-soft);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 10px 0 4px;
+  }
+
+  .step-item {
+    display: flex;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  .step-item:last-child { border-bottom: none; }
+  .step-num {
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .step-num-normal { background: var(--orange-light); color: var(--orange-dark); }
+  .step-num-fit { background: var(--green-light); color: var(--green-dark); }
+  .step-text { flex: 1; }
+
+  /* ADD MODAL */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 300;
+    display: flex;
+    align-items: flex-end;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s;
+  }
+  .modal-overlay.open { opacity: 1; pointer-events: all; }
+  .modal {
+    background: var(--card);
+    border-radius: 24px 24px 0 0;
+    padding: 8px 20px 40px;
+    width: 100%;
+    max-height: 92vh;
+    overflow-y: auto;
+    transform: translateY(100%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .modal-overlay.open .modal { transform: translateY(0); }
+  .modal-handle {
+    width: 36px; height: 4px;
+    background: #ddd;
+    border-radius: 2px;
+    margin: 12px auto 20px;
+  }
+  .modal-title {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    color: var(--text);
+  }
+
+  .form-group {
+    margin-bottom: 16px;
+  }
+  .form-label {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: var(--text-soft);
+    margin-bottom: 6px;
+    display: block;
+  }
+  .form-input, .form-textarea, .form-select {
+    width: 100%;
+    padding: 12px 14px;
+    border-radius: var(--radius-sm);
+    border: 1.5px solid var(--border);
+    background: var(--bg);
+    font-size: 15px;
+    color: var(--text);
+    font-family: inherit;
+    transition: border-color 0.15s;
+    outline: none;
+  }
+  .form-input:focus, .form-textarea:focus, .form-select:focus {
+    border-color: var(--orange);
+  }
+  .form-textarea { min-height: 90px; resize: vertical; }
+
+  .fit-toggle {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px;
+    background: var(--bg);
+    border-radius: var(--radius-sm);
+    border: 1.5px solid var(--border);
+    cursor: pointer;
+    transition: border-color 0.15s;
+  }
+  .fit-toggle.active { border-color: var(--green); background: var(--green-light); }
+  .toggle-switch {
+    width: 44px; height: 26px;
+    background: #ddd;
+    border-radius: 13px;
+    position: relative;
+    transition: background 0.2s;
+    flex-shrink: 0;
+  }
+  .toggle-switch.on { background: var(--green); }
+  .toggle-knob {
+    width: 20px; height: 20px;
+    background: #fff;
+    border-radius: 50%;
+    position: absolute;
+    top: 3px; left: 3px;
+    transition: left 0.2s;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+  }
+  .toggle-switch.on .toggle-knob { left: 21px; }
+  .toggle-label { font-size: 15px; font-weight: 600; color: var(--text); }
+  .toggle-sub { font-size: 12px; color: var(--text-soft); }
+
+  .emoji-picker {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 8px;
+  }
+  .emoji-opt {
+    width: 44px; height: 44px;
+    border-radius: 12px;
+    border: 2px solid transparent;
+    background: var(--bg);
+    font-size: 22px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .emoji-opt.selected { border-color: var(--orange); background: var(--orange-light); }
+
+  .btn-save {
+    width: 100%;
+    padding: 15px;
+    background: var(--orange);
+    color: #fff;
+    font-size: 16px;
+    font-weight: 700;
+    border: none;
+    border-radius: var(--radius);
+    cursor: pointer;
+    margin-top: 8px;
+    transition: background 0.15s;
+  }
+  .btn-save:active { background: var(--orange-dark); }
+
+  /* LOADING */
+  .loading-screen {
+    position: fixed; inset: 0;
+    background: var(--orange);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 999;
+    transition: opacity 0.4s;
+  }
+  .loading-screen.hidden { opacity: 0; pointer-events: none; }
+  .loading-emoji { font-size: 60px; margin-bottom: 16px; animation: pulse 1.2s infinite; }
+  .loading-title { font-size: 28px; font-weight: 800; color: #fff; letter-spacing: -0.5px; }
+  .loading-sub { font-size: 14px; color: rgba(255,255,255,0.75); margin-top: 6px; }
+  @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.08)} }
+
+  /* EMPTY STATE */
+  .empty-state {
+    text-align: center;
+    padding: 48px 20px;
+    color: var(--text-soft);
+  }
+  .empty-emoji { font-size: 48px; margin-bottom: 12px; }
+  .empty-title { font-size: 17px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+  .empty-sub { font-size: 14px; }
+
+  /* TOAST */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: #1A1A1A;
+    color: #fff;
+    padding: 12px 20px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 500;
+    z-index: 500;
+    transition: transform 0.3s;
+    white-space: nowrap;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* DELETE BTN */
+  .btn-delete {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #FEE2E2;
+    color: #DC2626;
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 12px 16px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 12px;
+    width: 100%;
+    justify-content: center;
+  }
+  .btn-delete:active { background: #FECACA; }
+
+  /* COUNTER BADGE */
+  .count-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255,255,255,0.3);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    min-width: 20px;
+    height: 20px;
+    border-radius: 10px;
+    padding: 0 6px;
+    margin-left: 6px;
+  }
+
+  .notes-card {
+    background: #FFFBEB;
+    border: 1.5px solid #FDE68A;
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    margin-bottom: 12px;
+    font-size: 13px;
+    color: #92400E;
+    line-height: 1.5;
+  }
+
+  /* INSTALL BANNER */
+  .install-banner {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(120px);
+    background: #1A1A1A;
+    color: #fff;
+    padding: 12px 20px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    z-index: 400;
+    transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
+    box-shadow: 0 4px 24px rgba(0,0,0,0.25);
+    white-space: nowrap;
+  }
+  .install-banner.show { transform: translateX(-50%) translateY(0); }
+  .install-banner-text { font-size: 14px; font-weight: 500; }
+  .install-banner-text span { font-size: 12px; color: rgba(255,255,255,0.6); display: block; }
+  .btn-install {
+    background: var(--orange);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 8px 14px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .btn-install-dismiss {
+    background: none;
+    border: none;
+    color: rgba(255,255,255,0.5);
+    font-size: 20px;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0 0 0 4px;
+  }
+
+  /* Safe area */
+  @supports (padding: max(0px)) {
+    .header { padding-top: max(56px, env(safe-area-inset-top, 20px) + 16px); }
+    .detail-header { padding-top: max(56px, env(safe-area-inset-top, 20px) + 16px); }
+  }
+</style>
+</head>
+<body>
+
+<div class="loading-screen" id="loadingScreen">
+  <div class="loading-emoji">🍳</div>
+  <div class="loading-title">Recetario</div>
+  <div class="loading-sub">Cargando recetas...</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- INSTALL BANNER -->
+<div class="install-banner" id="installBanner">
+  <div class="install-banner-text">
+    📲 Instalar Recetario
+    <span>Acceso rápido desde el móvil</span>
+  </div>
+  <button class="btn-install" id="btnInstall">Instalar</button>
+  <button class="btn-install-dismiss" onclick="dismissInstall()">×</button>
+</div>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-top">
+    <div>
+      <div class="header-title">🍳 Recetario</div>
+      <div class="header-subtitle" id="recipeCount">Cargando...</div>
+    </div>
+    <div class="btn-add-header" onclick="openAddModal()">+</div>
+  </div>
+  <div class="tabs">
+    <button class="tab tab-all active" onclick="setTab('all')">Todas <span class="count-badge" id="countAll">0</span></button>
+    <button class="tab tab-fit" onclick="setTab('fit')">🥗 Fit <span class="count-badge" id="countFit">0</span></button>
+  </div>
+</div>
+
+<!-- SEARCH -->
+<div class="search-bar">
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input class="search-input" type="search" placeholder="Buscar recetas..." id="searchInput" oninput="renderList()">
+  </div>
+</div>
+
+<!-- CONTENT -->
+<div class="content">
+  <div class="recipes-grid" id="recipesGrid"></div>
+</div>
+
+<!-- DETAIL VIEW -->
+<div class="detail-view" id="detailView">
+  <div class="detail-header" id="detailHeader">
+    <button class="btn-back" onclick="closeDetail()">← Volver</button>
+    <span class="detail-emoji-big" id="detailEmoji"></span>
+    <div class="detail-title" id="detailTitle"></div>
+    <div id="detailFitBadge"></div>
+  </div>
+  <div class="detail-body" id="detailBody"></div>
+</div>
+
+<!-- ADD MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="handleOverlayClick(event)">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">✨ Nueva receta</div>
+
+    <div class="form-group">
+      <label class="form-label">Nombre</label>
+      <input class="form-input" id="formName" placeholder="Ej: Tortitas de avena" type="text">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Emoji</label>
+      <div class="emoji-picker" id="emojiPicker">
+        <div class="emoji-opt selected" data-emoji="🍽️" onclick="selectEmoji(this)">🍽️</div>
+        <div class="emoji-opt" data-emoji="🥗" onclick="selectEmoji(this)">🥗</div>
+        <div class="emoji-opt" data-emoji="🍳" onclick="selectEmoji(this)">🍳</div>
+        <div class="emoji-opt" data-emoji="🥘" onclick="selectEmoji(this)">🥘</div>
+        <div class="emoji-opt" data-emoji="🍲" onclick="selectEmoji(this)">🍲</div>
+        <div class="emoji-opt" data-emoji="🥩" onclick="selectEmoji(this)">🥩</div>
+        <div class="emoji-opt" data-emoji="🍗" onclick="selectEmoji(this)">🍗</div>
+        <div class="emoji-opt" data-emoji="🥚" onclick="selectEmoji(this)">🥚</div>
+        <div class="emoji-opt" data-emoji="🫙" onclick="selectEmoji(this)">🫙</div>
+        <div class="emoji-opt" data-emoji="🍰" onclick="selectEmoji(this)">🍰</div>
+        <div class="emoji-opt" data-emoji="🍫" onclick="selectEmoji(this)">🍫</div>
+        <div class="emoji-opt" data-emoji="🥐" onclick="selectEmoji(this)">🥐</div>
+        <div class="emoji-opt" data-emoji="🍞" onclick="selectEmoji(this)">🍞</div>
+        <div class="emoji-opt" data-emoji="🥙" onclick="selectEmoji(this)">🥙</div>
+        <div class="emoji-opt" data-emoji="🍜" onclick="selectEmoji(this)">🍜</div>
+        <div class="emoji-opt" data-emoji="🌮" onclick="selectEmoji(this)">🌮</div>
+        <div class="emoji-opt" data-emoji="🫔" onclick="selectEmoji(this)">🫔</div>
+        <div class="emoji-opt" data-emoji="🥜" onclick="selectEmoji(this)">🥜</div>
+        <div class="emoji-opt" data-emoji="🫐" onclick="selectEmoji(this)">🫐</div>
+        <div class="emoji-opt" data-emoji="🥑" onclick="selectEmoji(this)">🥑</div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Ingredientes</label>
+      <textarea class="form-textarea" id="formIngredients" placeholder="Un ingrediente por línea&#10;Ej:&#10;200g pechuga de pollo&#10;1 cebolla&#10;Sal y pimienta"></textarea>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Pasos</label>
+      <textarea class="form-textarea" id="formSteps" placeholder="Un paso por línea&#10;Ej:&#10;Cortar el pollo en dados&#10;Sofreír la cebolla 5 min&#10;Añadir el pollo y cocinar"></textarea>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Notas (opcional)</label>
+      <input class="form-input" id="formNotes" placeholder="Consejos, variaciones..." type="text">
+    </div>
+
+    <div class="form-group">
+      <div class="fit-toggle" id="fitToggle" onclick="toggleFit()">
+        <div class="toggle-switch" id="toggleSwitch">
+          <div class="toggle-knob"></div>
+        </div>
+        <div>
+          <div class="toggle-label">Receta Fit 🥗</div>
+          <div class="toggle-sub">Apta para la dieta</div>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn-save" onclick="saveRecipe()">Guardar receta</button>
+  </div>
+</div>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+
+<script>
+// ═══════════════════════════════════════════════
+// FIREBASE CONFIG — Rellena con tus datos reales
+// ═══════════════════════════════════════════════
+const firebaseConfig = {
+  apiKey: "AIzaSyCnBC1UTJCSbaB7rKzhHnxcWHo0QvRRIXU",
+  authDomain: "recetario-monir.firebaseapp.com",
+  databaseURL: "https://recetario-monir-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "recetario-monir",
+  storageBucket: "recetario-monir.firebasestorage.app",
+  messagingSenderId: "95348160969",
+  appId: "1:95348160969:web:d347c5da142bcd80895018"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+const recipesRef = db.ref('recipes');
+
+// ═══════════════════════════════════════════════
+// ESTADO
+// ═══════════════════════════════════════════════
+let allRecipes = [];
+let currentTab = 'all';
+let selectedEmoji = '🍽️';
+let isFit = false;
+let currentDetailId = null;
+
+// ═══════════════════════════════════════════════
+// RECETAS INICIALES (se cargan una vez en Firebase)
+// ═══════════════════════════════════════════════
+const initialRecipes = [
+  {
+    name: "Tajín de pollo con ciruelas",
+    emoji: "🥘",
+    fit: false,
+    ingredients: [
+      "🐔 POLLO",
+      "1–1,2 kg contramuslos troceados",
+      "2–3 cdas aceite de oliva",
+      "2 dientes de ajo machacados",
+      "1 cdta jengibre molido",
+      "¾ cdta cúrcuma",
+      "½ cdta pimienta negra",
+      "½–1 cdta canela",
+      "¾–1 cdta sal",
+      "Perejil o cilantro (opcional)",
+      "——————",
+      "🌿 AZAFRÁN",
+      "10–15 hebras",
+      "2–3 cdas agua caliente",
+      "——————",
+      "🧅 CEBOLLA",
+      "2 cebollas grandes en pluma fina",
+      "Pizca de sal",
+      "——————",
+      "🍑 CIRUELAS",
+      "200–250 g ciruelas pasas",
+      "2–3 cdas miel",
+      "½–1 cdta canela",
+      "1 cucharón del caldo del guiso",
+      "Almendras tostadas"
+    ],
+    steps: [
+      "MARINAR (8–24 h antes): Mezcla aceite + ajo + especias + sal. Diluye el azafrán en agua caliente, reposa 5–10 min y añade al marinado. Embarra bien el pollo y deja en nevera mínimo 8 h.",
+      "SELLAR EL POLLO: En el tajín con aceite a fuego medio, dorar por tandas 2–3 min por lado. Solo color, no cocinar del todo. Reservar.",
+      "POCHAR LA CEBOLLA: En el mismo tajín, cebolla + pizca de sal durante 8–10 min hasta que quede muy blanda, translúcida y melosa.",
+      "MONTAR EL GUISO: Añadir pollo sellado + todo el jugo del marinado + agua de azafrán. Mezclar 1–2 min. Solo un chorrito de agua (100–150 ml máx.).",
+      "COCCIÓN LENTA: Tapado a fuego bajo durante 30–40 min sin remover. Debe hacer 'glu glu' suave.",
+      "REDUCIR: Destapar y subir el fuego 10–15 min hasta que la salsa espese y el pollo no flote. ⚠️ Este paso es CLAVE.",
+      "CIRUELAS: Aparte en un cazo, ciruelas + caldo + miel + canela durante 8–10 min hasta formar un jarabe espeso. Añadir al tajín.",
+      "GLASEAR: Destapado 5–10 min más hasta salsa brillante y espesa tipo miel ligera.",
+      "SERVIR: Terminar con almendras y perejil. Reposar 5 min y servir directo del tajín."
+    ],
+    notes: "Poco líquido, fuego suave, no remover mucho, siempre reducir destapado al final. Textura final = melosa, no caldosa."
+  },
+  {
+    name: "Tortitas",
+    emoji: "🥞",
+    fit: true,
+    ingredients: [
+      "40 g harina de avena",
+      "1 huevo",
+      "80 g queso fresco batido",
+      "10 g eritritol",
+      "2–3 g levadura",
+      "Esencia de vainilla",
+      "——————",
+      "SIROPE:",
+      "15 g proteína en polvo + leche"
+    ],
+    steps: [
+      "Mezclar todos los ingredientes hasta obtener una masa homogénea.",
+      "Cocinar en sartén con muy poco aceite a fuego medio.",
+      "Para el sirope: mezclar la proteína en polvo con leche hasta consistencia deseada y verter por encima."
+    ]
+  },
+  {
+    name: "McFlurry",
+    emoji: "🍦",
+    fit: true,
+    ingredients: [
+      "BASE:",
+      "20 g proteína de chocolate",
+      "70 g queso fresco batido",
+      "100–150 g fruta congelada",
+      "——————",
+      "TOPPING CRUJIENTE:",
+      "15 g harina de avena",
+      "20–30 g queso fresco batido",
+      "Eritritol",
+      "——————",
+      "SIROPE:",
+      "Proteína en polvo + leche"
+    ],
+    steps: [
+      "Mezclar todos los ingredientes de la base.",
+      "Para el topping: mezclar la harina con el queso fresco batido y eritritol hasta formar una masa.",
+      "Hacer una galleta con la masa y hornear en la AirFryer hasta que esté tostada.",
+      "Montar el McFlurry con la base, el topping crujiente troceado y el sirope por encima."
+    ]
+  },
+  {
+    name: "Salsa Big Mac",
+    emoji: "🫙",
+    fit: true,
+    ingredients: [
+      "50 g queso fresco batido",
+      "10 g pepinillos agridulces picados",
+      "5 g líquido de los pepinillos",
+      "10 g kétchup",
+      "5 g mostaza",
+      "Ajo en polvo",
+      "Cebolla en polvo",
+      "Sal"
+    ],
+    steps: [
+      "Mezclar todos los ingredientes.",
+      "Ajustar al gusto. Lista para usar."
+    ]
+  },
+  {
+    name: "Salsa Kebab",
+    emoji: "🫙",
+    fit: true,
+    ingredients: [
+      "50 g queso fresco batido",
+      "5 g limón",
+      "Comino",
+      "Ajo en polvo",
+      "Cebolla en polvo",
+      "Pimentón dulce",
+      "Pimienta",
+      "Sal",
+      "Piripiri"
+    ],
+    steps: [
+      "Mezclar todos los ingredientes.",
+      "Ajustar especias al gusto. Lista para usar."
+    ]
+  },
+  {
+    name: "Salsa de Piparras",
+    emoji: "🫙",
+    fit: true,
+    ingredients: [
+      "50 g queso fresco batido",
+      "50 g piparra picada",
+      "3 g líquido de piparra",
+      "5 g limón",
+      "Ajo en polvo",
+      "Cebolla en polvo",
+      "Sal"
+    ],
+    steps: [
+      "Mezclar todos los ingredientes.",
+      "Ajustar al gusto. Lista para usar."
+    ]
+  },
+  {
+    name: "Salsa Rosa",
+    emoji: "🫙",
+    fit: true,
+    ingredients: [
+      "50 g queso fresco batido",
+      "15 g kétchup",
+      "5 g mostaza",
+      "Ajo en polvo",
+      "Cebolla en polvo",
+      "Pimienta",
+      "Sal"
+    ],
+    steps: [
+      "Mezclar todos los ingredientes.",
+      "Ajustar al gusto. Lista para usar."
+    ]
+  },
+  {
+    name: "Meal Prep de Legumbres (3 días)",
+    emoji: "🍱",
+    fit: true,
+    ingredients: [
+      "600 g pechuga de pollo",
+      "1 pimiento verde",
+      "1 pimiento rojo",
+      "3 cebollas",
+      "2–3 tomates",
+      "10 g aceite (5g pollo + 5g verduras)",
+      "400 g legumbres escurridas (bote)",
+      "——————",
+      "OPCIONES:",
+      "600 g patata cocida (versión patata)",
+      "150 g arroz basmati (versión arroz)"
+    ],
+    steps: [
+      "Marinar el pollo con especias previamente.",
+      "Sofreír el pollo marinado en sartén o AirFryer.",
+      "Picar toda la verdura, mezclar con aceite y sal, sofreír en sartén o AirFryer.",
+      "Mezclar la verdura con el pollo.",
+      "Añadir el bote de legumbres y mezclar durante unos pocos minutos.",
+      "Si se hace con patata: pasar la patata cocida 15–20 min en la AirFryer hasta que quede tostada."
+    ]
+  },
+  {
+    name: "Pan Proteico",
+    emoji: "🍞",
+    fit: true,
+    ingredients: [
+      "2 huevos",
+      "150–200 g cottage",
+      "4 cdas harina de avena",
+      "1 cdta polvo de hornear",
+      "1 pizca de sal",
+      "1 cdta semillas de chía o lino (opcional)",
+      "Sésamo para espolvorear (opcional)",
+      "Chorrito de aceite o cdta yogur (opcional, para más ternura)"
+    ],
+    steps: [
+      "Mezcla todo en un bol (puedes batir con tenedor o mini batidora). Debe quedar una masa espesa tipo bizcocho denso.",
+      "Si queda muy líquida, añade más harina de avena. Si está bien, engrasa un molde pequeño (silicona o aluminio).",
+      "Vierte la mezcla y espolvorea semillas por encima.",
+      "Cocina en AirFryer a 170 °C durante 12–15 min (o hasta que al pinchar salga limpio).",
+      "Si se dora demasiado rápido, baja a 160 °C los últimos minutos.",
+      "Dejar enfriar 5–10 min fuera antes de cortar, así no se desmorona."
+    ]
+  },
+  {
+    name: "Brownie",
+    emoji: "🍫",
+    fit: true,
+    ingredients: [
+      "180 g yogur griego natural",
+      "40 g cacao puro en polvo desgrasado",
+      "1 huevo",
+      "30 g proteína en polvo sabor chocolate",
+      "50 g eritritol",
+      "30 g pepitas de chocolate sin azúcar",
+      "Sal en escamas (opcional, para decorar)"
+    ],
+    steps: [
+      "Precalienta el horno a 180 °C con calor arriba y abajo.",
+      "En un bol, mezcla todos los ingredientes excepto la sal en escamas hasta obtener una masa densa y homogénea.",
+      "Vierte la mezcla en el molde.",
+      "Hornea a 180 °C durante 25 minutos.",
+      "Saca del horno, deja templar, desmolda y sirve con sal en escamas por encima si quieres."
+    ]
+  },
+  {
+    name: "Carrot Cake",
+    emoji: "🥕",
+    fit: true,
+    ingredients: [
+      "BIZCOCHO:",
+      "70 g harina de avena integral",
+      "100 g zanahoria rallada fina",
+      "2 huevos enteros",
+      "120 g yogur griego natural sin azúcar",
+      "10 g aceite de oliva virgen extra",
+      "25–30 g eritritol",
+      "1 cdta canela en polvo",
+      "1 cdta esencia de vainilla (opcional)",
+      "4–5 g levadura química",
+      "1 pizca de sal",
+      "15–20 g chips de chocolate 85 %",
+      "——————",
+      "FROSTING:",
+      "Queso fresco batido con eritritol y esencia de vainilla"
+    ],
+    steps: [
+      "Precalienta el horno a 180 °C (calor arriba y abajo).",
+      "Ralla la zanahoria muy fina y resérvala.",
+      "En un bol grande, bate los huevos con el yogur griego, el aceite, el eritritol y la vainilla hasta obtener una mezcla homogénea.",
+      "Añade los ingredientes secos: harina de avena, canela, levadura y sal. Mezcla bien.",
+      "Incorpora la zanahoria rallada y las chips de chocolate.",
+      "Vierte en un molde pequeño (14x9 cm o redondo de 16 cm) forrado con papel vegetal.",
+      "Hornea 30–36 minutos o hasta que al pinchar salga con migas húmedas pero sin masa líquida.",
+      "Una vez frío, cubrir con frosting de queso fresco batido con eritritol y vainilla."
+    ]
+  },
+  {
+    name: "Tableta de Chocolate",
+    emoji: "🍫",
+    fit: true,
+    ingredients: [
+      "20 g proteína en polvo",
+      "10 g cacahuete en polvo desgrasado",
+      "Endulzante al gusto",
+      "Una pizca de sal",
+      "50 g queso fresco batido",
+      "50 g harina de avena",
+      "10 g gotas de chocolate sin azúcar",
+      "——————",
+      "COBERTURA:",
+      "50 g chocolate sin azúcar"
+    ],
+    steps: [
+      "Mezclar todos los ingredientes excepto la cobertura hasta obtener una masa manejable.",
+      "Meter en un molde de tableta y aplanar bien.",
+      "Fundir el chocolate sin azúcar y verter por encima uniformemente.",
+      "Meter al congelador hasta que solidifique."
+    ]
+  },
+  {
+    name: "Masa Wrapnahoria",
+    emoji: "🫔",
+    fit: true,
+    ingredients: [
+      "2 zanahorias ralladas",
+      "2 huevos",
+      "100 g queso mozzarella"
+    ],
+    steps: [
+      "Mezclar todos los ingredientes.",
+      "Extender la masa en una bandeja con papel vegetal formando un círculo o rectángulo fino.",
+      "Hornear 20 min a 180°C hasta que esté firme y ligeramente dorada.",
+      "Dejar enfriar y usar como wrap."
+    ]
+  },
+  {
+    name: "Crackers Saludables",
+    emoji: "🍘",
+    fit: true,
+    ingredients: [
+      "1 huevo pequeño (≈40 g)",
+      "44 g harina de almendras",
+      "40 g harina de avena",
+      "40 g queso parmesano rallado fino",
+      "40 g queso mozzarella rallado",
+      "½ cdta polvo de hornear",
+      "1 pizca de sal",
+      "1 cdta aceite de oliva (opcional)",
+      "Condimentos: orégano, romero, ajo en polvo, semillas..."
+    ],
+    steps: [
+      "Precalienta el horno a 170 °C.",
+      "Mezcla en un bol las harinas, el polvo de hornear, la sal y los condimentos.",
+      "Añade el huevo y los quesos rallados. Incorpora bien hasta formar una masa uniforme.",
+      "Si queda seca, añade una cdta de agua o aceite. Si muy pegajosa, espolvorea más avena.",
+      "Coloca la masa entre dos papeles de horno y estírala muy fina (2 mm aprox.).",
+      "Quita el papel superior y corta en cuadrados o triángulos.",
+      "Hornea 15–18 minutos hasta que estén doradas y firmes.",
+      "Apaga el horno y deja enfriar con la puerta entreabierta 10 min para que queden crujientes."
+    ]
+  },
+  {
+    name: "Arroz Meloso con Alitas",
+    emoji: "🍚",
+    fit: false,
+    ingredients: [
+      "CALDO:",
+      "1 carcasa de pollo troceada",
+      "2 alitas de pollo",
+      "½ cebolla (con piel limpia)",
+      "1 zanahoria troceada",
+      "½ puerro",
+      "1 diente de ajo con piel, aplastado",
+      "½ tomate o 1 cda tomate frito",
+      "1 litro de agua",
+      "Sal y pimienta",
+      "——————",
+      "SOFRITO:",
+      "2 cdas aceite de oliva",
+      "½ cebolla picada muy fina",
+      "1 diente de ajo picado",
+      "½ pimiento (opcional)",
+      "1 tomate maduro rallado",
+      "½ cdta pimentón dulce",
+      "Vino blanco o 2 cdas agua",
+      "——————",
+      "ARROZ:",
+      "150 g arroz redondo o bomba",
+      "450–500 ml caldo caliente",
+      "Mantequilla o aceite al final"
+    ],
+    steps: [
+      "CALDO: Dora la carcasa y alitas 8–10 min. Saca las alitas, desmenúzalas y reserva la carne. Los huesos vuelven a la olla.",
+      "Añade las verduras y sofríe 5–7 min. Añade el litro de agua fría, sal y pimienta.",
+      "Lleva a ebullición, retira la espuma y baja a fuego medio-bajo. Cocina 1 hora tapado a medias.",
+      "Cuela el caldo, vuelve a poner solo el líquido y mantenlo caliente.",
+      "SOFRITO: Sofríe la cebolla con sal 10–15 min hasta dorada. Añade ajo y pimiento, cocina 5 min.",
+      "Añade el tomate rallado y reduce 10–12 min hasta que quede espeso y oscuro.",
+      "Añade el pimentón (8–10 seg) y el vino para desglasar. Deja evaporar.",
+      "ARROZ: Añade el arroz al sofrito y rehógalo 1–2 min hasta nacarado.",
+      "Añade ⅔ del caldo caliente y cocina a fuego medio removiendo. Ve añadiendo el resto poco a poco.",
+      "A los 7–8 min añade la carne desmenuzada de las alitas.",
+      "Cocina en total 17–18 min. Al apagar, añade una nuez de mantequilla y remueve suave.",
+      "Tapa y reposa 3–4 min. Servir meloso y denso."
+    ],
+    notes: "El secreto: fuego suave en el caldo, sofrito lento y oscuro, y añadir el caldo poco a poco como un risotto."
+  },
+  {
+    name: "Dónuts Fit de Calabaza",
+    emoji: "🍩",
+    fit: true,
+    ingredients: [
+      "MASA (4 dónuts):",
+      "250 g calabaza cruda (→ ≈160 g asada)",
+      "2 huevos",
+      "55 g harina de avena",
+      "15 g cacahuete en polvo desgrasado",
+      "5 g levadura química",
+      "10–15 g eritritol o stevia",
+      "10 g aceite de oliva suave",
+      "1 cdta canela",
+      "1 cdta vainilla (opcional)",
+      "1 pizca de sal",
+      "——————",
+      "COBERTURA:",
+      "35–40 g chocolate 85 %",
+      "½ cdta aceite de oliva"
+    ],
+    steps: [
+      "Corta 250 g de calabaza cruda y hornéala sin aceite a 200 °C durante 25–30 min hasta que esté blanda. Retira la piel y pesa 160 g.",
+      "Tritura la calabaza con los huevos, el aceite, el endulzante y la vainilla hasta crear una crema.",
+      "Mezcla aparte los secos: harina + cacahuete en polvo + levadura + canela + sal.",
+      "Junta ambas mezclas. Si está muy espesa, añade 1–2 cdas de leche.",
+      "Engrasa ligeramente los moldes de dónut y rellena sin llegar al borde.",
+      "Hornea a 180 °C durante 15–18 min. Deja enfriar completamente.",
+      "Funde el chocolate 85 % con el aceite. Cubre los dónuts por encima o báñalos hasta la mitad.",
+      "Refrigera 10–15 min para que la cobertura solidifique."
+    ]
+  },
+  {
+    name: "Carne Mechada de Ternera",
+    emoji: "🥩",
+    fit: false,
+    ingredients: [
+      "400 g carne de ternera en tacos",
+      "½ cebolla grande picada",
+      "½ pimiento rojo picado (opcional)",
+      "1 zanahoria pequeña en cubitos (opcional)",
+      "1–2 dientes de ajo picados",
+      "1 tomate mediano rallado o 3–4 cdas tomate triturado",
+      "½ cdta pimentón dulce",
+      "¼ cdta comino (opcional)",
+      "½ hoja de laurel",
+      "Sal y pimienta",
+      "100–120 ml agua o caldo",
+      "20–30 ml vino blanco",
+      "Aceite de oliva"
+    ],
+    steps: [
+      "Calienta una olla con un chorrito de aceite. Añade los tacos de ternera y dóralos 5–7 min. Retira y reserva.",
+      "SOFRITO: En la misma olla, sofríe la cebolla a fuego medio 3–4 min. Añade el pimiento y sofríe 2 min. Añade la zanahoria y sofríe 2–3 min. Añade el ajo y cocina 30 seg.",
+      "Añade el tomate, el pimentón, el comino y el laurel. Cocina 2–3 min.",
+      "Añade el agua o caldo + vino blanco. Sube el fuego 1–2 min para evaporar el alcohol.",
+      "Devuelve la carne a la olla. Tapa completamente.",
+      "Cuando hierva, baja al mínimo. Cocina 70–80 min revisando a mitad.",
+      "La carne está lista cuando puedas meter un tenedor y el taco se abra sin esfuerzo. Desmenuza y sirve."
+    ]
+  },
+  {
+    name: "Pasta con Romesco, Feta y Aceitunas",
+    emoji: "🍝",
+    fit: false,
+    ingredients: [
+      "SALSA ROMESCO:",
+      "2 pimientos rojos medianos",
+      "2 tomates medianos",
+      "1 zanahoria pequeña",
+      "2 dientes de ajo (con piel)",
+      "1 cdta carne de pimiento choricero",
+      "1 puñado de almendras o avellanas",
+      "1 cdta pimentón dulce o ahumado",
+      "2–3 cdas aceite de oliva",
+      "Sal y pimienta",
+      "——————",
+      "PASTA Y TOPPINGS:",
+      "180–200 g pasta",
+      "80–100 g queso feta en dados",
+      "4–5 tomates secos",
+      "8–10 aceitunas negras",
+      "Parmesano (opcional)"
+    ],
+    steps: [
+      "ASAR: Precalienta el horno a 200 °C. Corta pimientos en trozos, tomates en cuartos, zanahoria en rodajas.",
+      "Pon todo en bandeja con los ajos enteros con piel, aceite, sal y pimienta. Asa 25–30 min hasta dorado y tierno.",
+      "ROMESCO: Saca los ajos de la piel. Pon en la batidora: todas las verduras asadas + choricero + almendras + aceite + pimentón + sal. Tritura hasta cremosa y espesa.",
+      "PASTA: Cuece en agua con sal. Reserva ½ vaso de agua de cocción.",
+      "Mezcla la pasta con la salsa y añade agua de cocción poco a poco hasta dejarla sedosa.",
+      "Añade el feta en dados, tomates secos picados, aceitunas en rodajitas y parmesano. Un chorrito de aceite al final."
+    ]
+  },
+  {
+    name: "Meal Prep de Boniato (3 días)",
+    emoji: "🍠",
+    fit: true,
+    ingredients: [
+      "600 g pechuga de pollo",
+      "50 g queso fresco batido",
+      "600 g boniato cocido (≈800 g en seco)",
+      "400 g champiñones laminados",
+      "300 g espárragos",
+      "2 cebollas",
+      "10 g aceite (5g boniato + 5g verduras)",
+      "Limón",
+      "Especias al gusto"
+    ],
+    steps: [
+      "Marinar el pollo con especias, queso fresco batido y limón.",
+      "Cocer el boniato cortado en dados (10–12 min).",
+      "Mezclar el boniato con 5 g de aceite, sal, ajo en polvo y pimentón. Cocinar en AirFryer 12–15 min a 190 °C, removiendo a mitad.",
+      "Cortar la verdura y mezclar con sal, aceite, ajo en polvo y pimienta. Cocinar en sartén o AirFryer 18–20 min a 190 °C.",
+      "Cocinar el pollo en la AirFryer 10–12 min a 190 °C.",
+      "Repartir en 3 tápers con la proporción deseada de cada ingrediente."
+    ]
+  },
+  {
+    name: "Babaganoush",
+    emoji: "🍆",
+    fit: true,
+    ingredients: [
+      "2 berenjenas",
+      "50 g queso fresco batido",
+      "10 g tahini",
+      "1 limón",
+      "1 diente de ajo",
+      "Sal",
+      "Comino",
+      "Pimentón"
+    ],
+    steps: [
+      "Cortar las berenjenas a lo largo y realizar cortes en la pulpa.",
+      "Cocinar en AirFryer 20–25 min a 190 °C hasta que estén muy blandas.",
+      "Sacar la pulpa con una cuchara y triturar junto al queso fresco batido, el tahini, el zumo de medio limón, el ajo y las especias.",
+      "Ajustar de sal y especias al gusto. Servir con un chorrito de aceite y pimentón por encima."
+    ]
+  }
+];
+
+// ═══════════════════════════════════════════════
+// FIREBASE — Escucha en tiempo real
+// ═══════════════════════════════════════════════
+let initialized = false;
+
+recipesRef.on('value', (snapshot) => {
+  const data = snapshot.val();
+  if (!data) {
+    // Primera vez: cargar recetas iniciales
+    if (!initialized) {
+      initialized = true;
+      initialRecipes.forEach(r => {
+        recipesRef.push({ ...r, createdAt: Date.now() });
+      });
+    }
+  } else {
+    allRecipes = Object.entries(data).map(([id, val]) => ({ id, ...val }));
+    allRecipes.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+    renderList();
+    updateCounts();
+    hideLoading();
+    initialized = true;
+  }
+});
+
+function hideLoading() {
+  document.getElementById('loadingScreen').classList.add('hidden');
+}
+
+// ═══════════════════════════════════════════════
+// RENDER LISTA
+// ═══════════════════════════════════════════════
+function setTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelector('.tab-' + tab).classList.add('active');
+  renderList();
+}
+
+function renderList() {
+  const search = (document.getElementById('searchInput').value || '').toLowerCase();
+  let filtered = allRecipes.filter(r => {
+    const matchTab = currentTab === 'all' || (currentTab === 'fit' && r.fit);
+    const matchSearch = !search || r.name.toLowerCase().includes(search);
+    return matchTab && matchSearch;
+  });
+
+  const grid = document.getElementById('recipesGrid');
+  if (filtered.length === 0) {
+    grid.innerHTML = `<div class="empty-state">
+      <div class="empty-emoji">🍽️</div>
+      <div class="empty-title">No hay recetas</div>
+      <div class="empty-sub">${search ? 'Prueba con otro término' : 'Añade la primera receta pulsando el +'}</div>
+    </div>`;
+    return;
+  }
+
+  // Agrupar: normales y fit
+  const normal = filtered.filter(r => !r.fit);
+  const fit = filtered.filter(r => r.fit);
+  let html = '';
+
+  if (currentTab === 'all') {
+    if (normal.length > 0) {
+      if (fit.length > 0) html += `<div class="category-label">🍽️ Todas las recetas</div>`;
+      normal.forEach(r => html += renderCard(r));
+    }
+    if (fit.length > 0) {
+      html += `<div class="category-label">🥗 Recetas Fit</div>`;
+      fit.forEach(r => html += renderCard(r));
+    }
+  } else {
+    fit.forEach(r => html += renderCard(r));
+  }
+
+  grid.innerHTML = html;
+}
+
+function renderCard(r) {
+  const isFitCard = r.fit;
+  const ingCount = (r.ingredients || []).filter(i => !i.startsWith('——') && !i.endsWith(':') && i !== '').length;
+  const fitBadge = isFitCard ? `<div class="fit-badge">✓ Fit</div>` : '';
+  return `<div class="recipe-card ${isFitCard ? 'fit-card' : ''}" onclick="openDetail('${r.id}')">
+    <div class="recipe-emoji ${isFitCard ? 'fit' : 'normal'}">${r.emoji || '🍽️'}</div>
+    <div class="recipe-info">
+      <div class="recipe-name">${r.name}</div>
+      <div class="recipe-meta">${ingCount} ingredientes · ${(r.steps || []).length} pasos</div>
+    </div>
+    ${fitBadge}
+    <div class="card-arrow">›</div>
+  </div>`;
+}
+
+function updateCounts() {
+  const all = allRecipes.length;
+  const fit = allRecipes.filter(r => r.fit).length;
+  document.getElementById('countAll').textContent = all;
+  document.getElementById('countFit').textContent = fit;
+  document.getElementById('recipeCount').textContent = `${all} recetas · ${fit} fit`;
+}
+
+// ═══════════════════════════════════════════════
+// DETAIL VIEW
+// ═══════════════════════════════════════════════
+function openDetail(id) {
+  const r = allRecipes.find(x => x.id === id);
+  if (!r) return;
+  currentDetailId = id;
+
+  document.getElementById('detailHeader').className = 'detail-header ' + (r.fit ? 'fit' : 'normal');
+  document.getElementById('detailEmoji').textContent = r.emoji || '🍽️';
+  document.getElementById('detailTitle').textContent = r.name;
+  document.getElementById('detailFitBadge').innerHTML = r.fit ? `<div class="detail-fit-badge">✓ Receta Fit</div>` : '';
+
+  const dotClass = r.fit ? 'dot-fit' : 'dot-normal';
+  const stepNumClass = r.fit ? 'step-num-fit' : 'step-num-normal';
+
+  let ingredientsHTML = '';
+  (r.ingredients || []).forEach(ing => {
+    if (ing.startsWith('——')) {
+      ingredientsHTML += `<div style="height:4px;"></div>`;
+    } else if (ing.endsWith(':')) {
+      ingredientsHTML += `<div class="ingredient-subgroup">${ing}</div>`;
+    } else if (ing) {
+      ingredientsHTML += `<div class="ingredient-item">
+        <div class="ingredient-dot ${dotClass}"></div>
+        <span>${ing}</span>
+      </div>`;
+    }
+  });
+
+  let stepsHTML = '';
+  (r.steps || []).forEach((step, i) => {
+    stepsHTML += `<div class="step-item">
+      <div class="step-num ${stepNumClass}">${i+1}</div>
+      <div class="step-text">${step}</div>
+    </div>`;
+  });
+
+  let notesHTML = r.notes ? `<div class="notes-card">💡 ${r.notes}</div>` : '';
+
+  document.getElementById('detailBody').innerHTML = `
+    ${notesHTML}
+    <div class="section-card">
+      <div class="section-title">
+        <div class="section-title-icon icon-ing">🛒</div>
+        Ingredientes
+      </div>
+      ${ingredientsHTML}
+    </div>
+    <div class="section-card">
+      <div class="section-title">
+        <div class="section-title-icon icon-steps">👨‍🍳</div>
+        Paso a paso
+      </div>
+      ${stepsHTML}
+    </div>
+    <button class="btn-delete" onclick="deleteRecipe('${r.id}')">🗑️ Eliminar receta</button>
+  `;
+
+  document.getElementById('detailView').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeDetail() {
+  document.getElementById('detailView').classList.remove('open');
+  document.body.style.overflow = '';
+  currentDetailId = null;
+}
+
+function deleteRecipe(id) {
+  if (!confirm('¿Seguro que quieres eliminar esta receta?')) return;
+  recipesRef.child(id).remove();
+  closeDetail();
+  showToast('Receta eliminada');
+}
+
+// ═══════════════════════════════════════════════
+// ADD MODAL
+// ═══════════════════════════════════════════════
+function openAddModal() {
+  document.getElementById('formName').value = '';
+  document.getElementById('formIngredients').value = '';
+  document.getElementById('formSteps').value = '';
+  document.getElementById('formNotes').value = '';
+  isFit = false;
+  selectedEmoji = '🍽️';
+  document.querySelectorAll('.emoji-opt').forEach(e => e.classList.remove('selected'));
+  document.querySelector('[data-emoji="🍽️"]').classList.add('selected');
+  document.getElementById('toggleSwitch').classList.remove('on');
+  document.getElementById('fitToggle').classList.remove('active');
+  document.getElementById('modalOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  setTimeout(() => document.getElementById('formName').focus(), 300);
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function handleOverlayClick(e) {
+  if (e.target === document.getElementById('modalOverlay')) closeModal();
+}
+
+function selectEmoji(el) {
+  document.querySelectorAll('.emoji-opt').forEach(e => e.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedEmoji = el.dataset.emoji;
+}
+
+function toggleFit() {
+  isFit = !isFit;
+  document.getElementById('toggleSwitch').classList.toggle('on', isFit);
+  document.getElementById('fitToggle').classList.toggle('active', isFit);
+}
+
+function saveRecipe() {
+  const name = document.getElementById('formName').value.trim();
+  if (!name) { showToast('Añade un nombre a la receta'); return; }
+
+  const rawIng = document.getElementById('formIngredients').value.trim();
+  const rawSteps = document.getElementById('formSteps').value.trim();
+  const notes = document.getElementById('formNotes').value.trim();
+
+  const ingredients = rawIng ? rawIng.split('\n').map(l => l.trim()).filter(Boolean) : [];
+  const steps = rawSteps ? rawSteps.split('\n').map(l => l.trim()).filter(Boolean) : [];
+
+  const newRecipe = {
+    name,
+    emoji: selectedEmoji,
+    fit: isFit,
+    ingredients,
+    steps,
+    notes: notes || null,
+    createdAt: Date.now()
+  };
+
+  recipesRef.push(newRecipe);
+  closeModal();
+  showToast('¡Receta guardada! 🎉');
+}
+
+// ═══════════════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════════════
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+// ═══════════════════════════════════════════════
+// PWA INSTALL
+// ═══════════════════════════════════════════════
+let deferredPrompt = null;
+
+window.addEventListener("beforeinstallprompt", (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  setTimeout(() => {
+    document.getElementById("installBanner").classList.add("show");
+  }, 2000);
+});
+
+document.getElementById("btnInstall").addEventListener("click", async () => {
+  if (!deferredPrompt) return;
+  deferredPrompt.prompt();
+  const { outcome } = await deferredPrompt.userChoice;
+  deferredPrompt = null;
+  document.getElementById("installBanner").classList.remove("show");
+  if (outcome === "accepted") showToast("¡App instalada! 🎉");
+});
+
+window.addEventListener("appinstalled", () => {
+  document.getElementById("installBanner").classList.remove("show");
+  deferredPrompt = null;
+});
+
+function dismissInstall() {
+  document.getElementById("installBanner").classList.remove("show");
+}
+
+// Swipe para cerrar el detalle
+let touchStartX = 0;
+document.getElementById('detailView').addEventListener('touchstart', e => {
+  touchStartX = e.touches[0].clientX;
+}, { passive: true });
+document.getElementById('detailView').addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].clientX - touchStartX;
+  if (dx > 80) closeDetail();
+}, { passive: true });
+</script>
+</body>
+</html>
